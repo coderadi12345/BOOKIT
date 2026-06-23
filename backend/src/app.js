@@ -11,11 +11,19 @@ import { AppError } from "./lib/errors.js";
 
 const app = express();
 
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+const frontendOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+  .split(",")
+  .map((s) => s.trim());
 
 app.use(
   cors({
-    origin: frontendUrl,
+    origin(origin, callback) {
+      if (!origin || frontendOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );

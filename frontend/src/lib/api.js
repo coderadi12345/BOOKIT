@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 export class ApiError extends Error {
   constructor(status, message, code) {
@@ -9,14 +9,22 @@ export class ApiError extends Error {
 }
 
 async function request(path, options = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
+  let res;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+  } catch {
+    throw new ApiError(
+      0,
+      "Cannot reach the API. Make sure the backend is running (cd backend && npm run dev)."
+    );
+  }
 
   const data = await res.json().catch(() => ({}));
 
