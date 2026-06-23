@@ -1,5 +1,5 @@
 import { Router } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { AppError } from "../lib/errors.js";
@@ -33,7 +33,7 @@ router.post("/signup", async (req, res, next) => {
         passwordHash,
         role: body.role,
       },
-    })
+    });
     setAuthCookie(res, { userId: user.id, email: user.email, role: user.role });
     res.status(201).json({
       id: user.id,
