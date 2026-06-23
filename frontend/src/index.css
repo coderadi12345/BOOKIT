@@ -53,7 +53,7 @@ a {
   transition: color 0.15s ease;
 }
 
-a:hover {
+a:not(.btn):hover {
   color: var(--accent-hover);
 }
 
@@ -162,6 +162,7 @@ main.container {
 }
 
 .nav-links .btn-primary:hover:not(:disabled) {
+  color: white;
   box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
 }
 
@@ -211,6 +212,8 @@ main.container {
 
 .btn-primary:hover:not(:disabled) {
   background: var(--accent-hover);
+  color: white;
+  text-decoration: none;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
