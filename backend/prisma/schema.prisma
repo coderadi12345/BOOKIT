@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  organizer
+}
+
+enum BookingStatus {
+  confirmed
+  cancelled
+}
+
+enum ActivityAction {
+  event_viewed
+  booking_started
+  booking_confirmed
+  booking_cancelled
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String        @map("password_hash")
+  role         Role          @default(user)
+  createdAt    DateTime      @default(now()) @map("created_at")
+  bookings     Booking[]
+  events       Event[]       @relation("OrganizerEvents")
+  activities   ActivityLog[]
+
+  @@map("users")
+}
+
+model Event {
+  id          String        @id @default(uuid())
+  organizerId String        @map("organizer_id")
+  title       String
+  description String
+  venue       String
+  dateTime    DateTime      @map("date_time")
+  capacity    Int
+  price       Decimal       @db.Decimal(10, 2)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  organizer   User          @relation("OrganizerEvents", fields: [organizerId], references: [id])
+  bookings    Booking[]
+  activities  ActivityLog[]
+
+  @@index([dateTime])
+  @@index([title])
+  @@map("events")
+}
+
+model Booking {
+  id        String        @id @default(uuid())
+  userId    String        @map("user_id")
+  eventId   String        @map("event_id")
+  status    BookingStatus @default(confirmed)
+  createdAt DateTime      @default(now()) @map("created_at")
+  user      User          @relation(fields: [userId], references: [id])
+  event     Event         @relation(fields: [eventId], references: [id])
+
+  @@unique([userId, eventId])
+  @@index([eventId, status])
+  @@map("bookings")
+}
+
+model ActivityLog {
+  id        String         @id @default(uuid())
+  eventId   String         @map("event_id")
+  userId    String?        @map("user_id")
+  action    ActivityAction
+  createdAt DateTime       @default(now()) @map("created_at")
+  event     Event          @relation(fields: [eventId], references: [id])
+  user      User?          @relation(fields: [userId], references: [id])
+
+  @@index([eventId, action])
+  @@map("activity_log")
+}
